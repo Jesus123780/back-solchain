@@ -1,0 +1,23 @@
+type Admin {
+    name: String
+}
+
+type USUARIO {
+    lastName: String
+    name: String
+}
+
+type Book {
+    title: String
+    author: String
+}
+
+type Query {
+    getAdmin(id: ID): Admin
+    books: [Book]
+    usuario: USUARIO
+}
+
+type Mutation {
+    createAdmin(name: String!): Admin
+}

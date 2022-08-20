@@ -1,4 +1,4 @@
-import { ApolloServer, gql } from 'apollo-server-express'
+import { ApolloServer } from 'apollo-server-express'
 import { ApolloServerPluginLandingPageGraphQLPlayground } from 'apollo-server-core'
 import express from 'express'
 import { createServer } from 'node:http'
@@ -6,6 +6,9 @@ import jwt from 'jsonwebtoken'
 import { makeExecutableSchema } from '@graphql-tools/schema'
 import { SubscriptionServer } from 'subscriptions-transport-ws'
 import { execute, subscribe } from 'graphql'
+import typeDefs from '../src/lib/typeDefs'
+import resolvers from '../src/lib/resolvers'
+
 require('dotenv').config();
 (async () => {
   // config ports
@@ -21,45 +24,19 @@ require('dotenv').config();
   app.listen(API_REST_PORT, () => {
     console.log('API SERVER LISTENING ON PORT', API_REST_PORT)
   })
-  const typeDefs = gql`
-  type Book {
-    title: String
-    author: String
-  }
+  // const resolvers = {
+  //   Query: {
+  //     books: () => books,
+  //     usuario: () => {
+  //       const todo = 'Juan  Perez'
+  //       return {
+  //         lastName: 'Perez',
+  //         name: todo
+  //       }
+  //     }
 
-  type USUARIO {
-    lastName: String
-    name: String
-  }
-
-  type Query {
-    books: [Book]
-    usuario: USUARIO
-  }
-`
-  const books = [
-    {
-      title: 'The Awakening',
-      author: 'Kate Chopin'
-    },
-    {
-      title: 'City of Glass',
-      author: 'Paul Auster'
-    }
-  ]
-  const resolvers = {
-    Query: {
-      books: () => books,
-      usuario: () => {
-        const todo = 'Juan  Perez'
-        return {
-          lastName: 'Perez',
-          name: todo
-        }
-      }
-
-    }
-  }
+  //   }
+  // }
 
   // Middleware
   app.use(express.json({ limit: '50mb' }))
