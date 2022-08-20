@@ -6,7 +6,7 @@ import jwt from 'jsonwebtoken'
 import { makeExecutableSchema } from '@graphql-tools/schema'
 import { SubscriptionServer } from 'subscriptions-transport-ws'
 import { execute, subscribe } from 'graphql'
-
+require('dotenv').config();
 (async () => {
   // config ports
   const GRAPHQL_PORT = 4000
@@ -37,7 +37,7 @@ import { execute, subscribe } from 'graphql'
     usuario: USUARIO
   }
 `
-  const books = [A
+  const books = [
     {
       title: 'The Awakening',
       author: 'Kate Chopin'
@@ -78,15 +78,16 @@ import { execute, subscribe } from 'graphql'
         const { body } = req || {}
         const { variables } = body || {}
         const store = variables.to || ''
+        console.log(process.env.NODE_AUT_SECRET, 8)
         if (token !== 'null') {
           try {
             // validate user in client.
-            const User = await jwt.verify(token, '12ba105efUaGjihGrh0LfJHTGIBGu6jXV')
+            const User = await jwt.verify(token || '', process.env.NODE_AUT_SECRET)
             // let User = null
             return { User, res, ADMIN_APP: url, store }
           } catch (err) {
             console.log(err)
-            console.log('Hola esto es un error del contexto')
+            console.log('CONTEXT ERROR')
           }
         } else { return { ADMIN_APP: url } }
       } catch (error) {
