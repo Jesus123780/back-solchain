@@ -12,12 +12,12 @@ import resolvers from '../src/lib/resolvers'
 require('dotenv').config();
 (async () => {
   // config ports
-  const GRAPHQL_PORT = 4000
-  const API_REST_PORT = 5000
+  const GRAPHQL_PORT = 3002
+  const API_REST_PORT = 3003
   // Initialization apps
   const app = express()
   // Routes
-  app.set('port', process.env.GRAPHQL_PORT || 4000)
+  app.set('port', process.env.GRAPHQL_PORT || 3003)
 
   app.post('/image', (req, res) => { res.json('/image api') })
   // Listen App
@@ -75,7 +75,7 @@ require('dotenv').config();
   await server.start()
   server.applyMiddleware({ app })
   SubscriptionServer.create({ schema, execute, subscribe }, { server: httpServer, path: server.graphqlPath })
-  httpServer.listen(GRAPHQL_PORT || 4000, () => {
+  httpServer.listen(GRAPHQL_PORT || 3003, () => {
     console.log(`🚀 Query endpoint ready at http://localhost:${GRAPHQL_PORT}`)
     console.log(`🚀 Subscription endpoint ready at ws://localhost:${GRAPHQL_PORT}${server.graphqlPath}`)
   })
