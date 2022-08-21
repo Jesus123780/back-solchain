@@ -1,11 +1,11 @@
 import user from './user'
 
 export default {
-  TYPES: {
-  },
-  QUERIES: {
-    ...user.QUERIES
-  },
-  MUTATIONS: {
-  }
+    TYPES: {
+    },
+    QUERIES: {
+        ...user.QUERIES
+    },
+    MUTATIONS: {
+    }
 }

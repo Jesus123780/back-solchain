@@ -1,82 +1,76 @@
-import { ApolloServer } from 'apollo-server-express'
-import { ApolloServerPluginLandingPageGraphQLPlayground } from 'apollo-server-core'
 import express from 'express'
-import { createServer } from 'node:http'
-import jwt from 'jsonwebtoken'
 import { makeExecutableSchema } from '@graphql-tools/schema'
-import { SubscriptionServer } from 'subscriptions-transport-ws'
+import { ApolloServerPluginLandingPageGraphQLPlayground } from 'apollo-server-core'
+import { ApolloServer } from 'apollo-server-express'
 import { execute, subscribe } from 'graphql'
-import typeDefs from '../src/lib/typeDefs'
+import jwt from 'jsonwebtoken'
+import { createServer } from 'node:http'
+import { SubscriptionServer } from 'subscriptions-transport-ws'
 import resolvers from '../src/lib/resolvers'
-
+import typeDefs from '../src/lib/typeDefs'
 require('dotenv').config();
+
 (async () => {
-  // config ports
-  const GRAPHQL_PORT = 3002
-  const API_REST_PORT = 3003
-  // Initialization apps
-  const app = express()
-  // Routes
-  app.set('port', process.env.GRAPHQL_PORT || 3003)
-
-  app.post('/image', (req, res) => { res.json('/image api') })
-  // Listen App
-  app.listen(API_REST_PORT, () => {
-    console.log('API SERVER LISTENING ON PORT', API_REST_PORT)
-  })
-  // const resolvers = {
-  //   Query: {
-  //     books: () => books,
-  //     usuario: () => {
-  //       const todo = 'Juan  Perez'
-  //       return {
-  //         lastName: 'Perez',
-  //         name: todo
-  //       }
-  //     }
-
-  //   }
-  // }
-
-  // Middleware
-  app.use(express.json({ limit: '50mb' }))
-  const httpServer = createServer(app)
-  const schema = makeExecutableSchema({ typeDefs, resolvers })
-  const server = new ApolloServer({
-    typeDefs,
-    resolvers,
-    introspection: true,
-    persistedQueries: true,
-    plugins: [ApolloServerPluginLandingPageGraphQLPlayground()],
-    context: async ({ req, res }) => {
-      const url = 'http://localhost:3001/app/api/graphql'
-      try {
-        const token = (req.headers.authorization?.split(' ')[1])
-        const { body } = req || {}
-        const { variables } = body || {}
-        const store = variables.to || ''
-        console.log(process.env.NODE_AUT_SECRET, 8)
-        if (token !== 'null') {
-          try {
-            // validate user in client.
-            const User = await jwt.verify(token || '', process.env.NODE_AUT_SECRET)
-            // let User = null
-            return { User, res, ADMIN_APP: url, store }
-          } catch (err) {
-            console.log(err)
-            console.log('CONTEXT ERROR')
-          }
-        } else { return { ADMIN_APP: url } }
-      } catch (error) {
-        console.log(error, 'finalERROR')
-      }
-    }
-  })
-  await server.start()
-  server.applyMiddleware({ app })
-  SubscriptionServer.create({ schema, execute, subscribe }, { server: httpServer, path: server.graphqlPath })
-  httpServer.listen(GRAPHQL_PORT || 3003, () => {
-    console.log(`🚀 Query endpoint ready at http://localhost:${GRAPHQL_PORT}`)
-    console.log(`🚀 Subscription endpoint ready at ws://localhost:${GRAPHQL_PORT}${server.graphqlPath}`)
-  })
+    // config ports
+    const GRAPHQL_PORT = 3002
+    const API_REST_PORT = 3003
+    // Initialization apps
+    const app = express()
+    // Routes
+    app.set('port', process.env.GRAPHQL_PORT || 3003)
+    app.post('/image', (req, res) => { res.json('/image api') })
+    // Listen App
+    app.listen(API_REST_PORT, () => {
+        console.log('API SERVER LISTENING ON PORT', API_REST_PORT)
+    })
+    // Middleware
+    app.use(express.json({ limit: '50mb' }))
+    const httpServer = createServer(app)
+    const schema = makeExecutableSchema({ typeDefs, resolvers })
+    const server = new ApolloServer({
+        typeDefs,
+        resolvers,
+        introspection: true,
+        persistedQueries: true,
+        plugins: [ApolloServerPluginLandingPageGraphQLPlayground()],
+        context: async ({ req, res }) => {
+            const device = req.headers.device
+            const NEXT_APP_ADMIN = process.env.NEXT_APP_ADMIN
+            const NEXT_APP_CLIENT = process.env.NEXT_APP_ADMIN
+            try {
+                const token = req.headers.authorization?.split(' ')[1]
+                if (token && token !== null && token !== undefined) {
+                    try {
+                        // validate user in client.
+                        const User = await jwt.verify(token, process.env.NODE_AUT_SECRET)
+                        return {
+                            device,
+                            NEXT_APP_ADMIN,
+                            NEXT_APP_CLIENT,
+                            res,
+                            User
+                        }
+                    } catch (err) {
+                        console.log(err, 'CONTEXT ERROR')
+                    }
+                } else {
+                    return {
+                        device,
+                        NEXT_APP_ADMIN,
+                        NEXT_APP_CLIENT,
+                        res
+                    }
+                }
+            } catch (error) {
+                console.log(error, 'Final Error')
+            }
+        }
+    })
+    await server.start()
+    server.applyMiddleware({ app })
+    SubscriptionServer.create({ schema, execute, subscribe }, { server: httpServer, path: server.graphqlPath })
+    httpServer.listen(GRAPHQL_PORT || 3003, () => {
+        console.log(`🚀 Query endpoint ready at http://localhost:${ GRAPHQL_PORT }`)
+        console.log(`🚀 Subscription endpoint ready at ws://localhost:${ GRAPHQL_PORT }${ server.graphqlPath }`)
+    })
 })()
