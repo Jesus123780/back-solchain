@@ -48,6 +48,7 @@ require('dotenv').config();
                             NEXT_APP_ADMIN,
                             NEXT_APP_CLIENT,
                             res,
+                            req,
                             User
                         }
                     } catch (err) {
@@ -58,7 +59,8 @@ require('dotenv').config();
                         device,
                         NEXT_APP_ADMIN,
                         NEXT_APP_CLIENT,
-                        res
+                        res,
+                        req
                     }
                 }
             } catch (error) {
